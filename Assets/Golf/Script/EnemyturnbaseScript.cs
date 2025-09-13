@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public class EnemyturnbaseScript : MonoBehaviour
 {
-    public ScriptableObject enemy;
+    public TestEnemyScriptable enemy;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -22,6 +23,11 @@ public class EnemyturnbaseScript : MonoBehaviour
     {
        StartCoroutine(Attackscript());
     }
+    public void Takedamage()
+    {
+        
+
+    }
     IEnumerator Attackscript() 
     {
         //Player TakeDamage
@@ -30,4 +36,5 @@ public class EnemyturnbaseScript : MonoBehaviour
 
 
     }
+   
 }

@@ -3,6 +3,9 @@ using UnityEngine;
 public class TestEnemyScriptable : ScriptableObject
 {
     public Animator animator;
+    public int health;
+    public int def;
+    public int atk;
 
     void Start()
     {
