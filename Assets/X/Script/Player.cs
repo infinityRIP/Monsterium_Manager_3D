@@ -1,22 +1,23 @@
+using NaughtyAttributes;
 using UnityEngine;
 
 public class Player : Singleton<Player>
 {
     #region Movement Setting
-    public float moveSpeed = 5f;
-    public float groundDist;
-    public LayerMask terrainLayer;
+    [BoxGroup("Movement Setting"), SerializeReference] public float moveSpeed = 5f;
+    [BoxGroup("Movement Setting"), SerializeReference] public LayerMask terrainLayer;
+    [BoxGroup("Movement Setting"), SerializeReference] public Vector3 moveDir;
     #endregion
 
-    [HideInInspector]
+    #region Component
     JumpController jc;
     Rigidbody rb;
     SpriteRenderer sr;
     PlayerAnimation Pa;
     Animator am;
-    public Vector3 moveDir;
+    #endregion
 
-
+    #region Unity Methods
     void Awake()
     {
         jc = GetComponent<JumpController>();
@@ -36,6 +37,9 @@ public class Player : Singleton<Player>
     {
         Move();
     }
+    #endregion
+
+    #region Movement Methods
     void InputManagement()
     {
         float moveX = Input.GetAxisRaw("Horizontal");
@@ -62,4 +66,5 @@ public class Player : Singleton<Player>
             am.SetBool("isRunning", false);
         }
     }
+    #endregion
 }

@@ -1,22 +1,25 @@
-using UnityEditor.Experimental.GraphView;
+using NaughtyAttributes;
 using UnityEngine;
 
 public class JumpController : MonoBehaviour
 {
-    [Header("Movement Stats")]
-    public KeyCode jumpKey = KeyCode.Space;
-    public float jumpForce = 5f;
+    [BoxGroup("Movement Stats"), SerializeReference] public KeyCode jumpKey = KeyCode.Space;
+    [BoxGroup("Movement Stats"), SerializeReference] public float jumpForce = 5f;
+
+    [Foldout("Ground", true)] public Transform groundCheck;
+    [Foldout("Ground", true)] public float groundRadius = 0.25f;
+    [Foldout("Ground", true)] public LayerMask groundLayer;
+
+    #region Bool
+    [Foldout("Bool", true)] public bool isGrounded;
+    [Foldout("Bool", true)] public bool jumpPressed;
+    #endregion 
+
+    #region Component
     Rigidbody rb;
     Animator am;
+    #endregion
 
-    [Header("Ground")]
-    [SerializeField] Transform groundCheck;
-    [SerializeField] float groundRadius = 0.25f;
-    public LayerMask groundLayer;
-
-    [Header("Bool")]
-    public bool isGrounded;
-    public bool jumpPressed;
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
