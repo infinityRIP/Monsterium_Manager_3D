@@ -41,6 +41,18 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Frame
+    uniqueID: 4135491273
+    locked: 0
+  - name: Picture
+    uniqueID: 1977244025
+    locked: 0
+  - name: Card
+    uniqueID: 1909143961
+    locked: 0
+  - name: 
+    uniqueID: 2341117191
+    locked: 0
   m_RenderingLayers:
   - Default
   - Light Layer 1
