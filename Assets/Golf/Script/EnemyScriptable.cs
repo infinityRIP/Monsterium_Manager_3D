@@ -7,13 +7,14 @@ public class EnemyScriptable : ScriptableObject
     public string enemyName;
     public int defense;
     public int defualtdefense;
+    public int costRegen;
     private int TotalHealth { get { return currentHealth; } set { currentHealth = Mathf.Clamp(value, 0, maxHealth);} }
     public int currentHealth;
     public int maxHealth;
     [SerializeField]int currentcost = 10;
     public int cost { get { return currentcost; } set { currentcost = Mathf.Clamp(value, 0, 10); } }
 
-    void TakeDamage(int damage)
+    public void TakeDamage(int damage)
     {
         damage -= defense;
         TotalHealth -= damage;
@@ -22,7 +23,10 @@ public class EnemyScriptable : ScriptableObject
             //die
         }
     }
-
+    public void AddCost(int costvalue)
+    {
+        cost += costvalue;
+    }
 
 
 

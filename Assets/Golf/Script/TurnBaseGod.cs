@@ -21,7 +21,7 @@ public class TurnBaseGod : MonoBehaviour
     TurnBaseGodState state;
     void Start()
     {
-        enemy.cost = 3;
+       enemy.cost = 3;
        state = TurnBaseGodState.Start;
        StartCoroutine(SetupBattle());
     }
@@ -34,6 +34,9 @@ public class TurnBaseGod : MonoBehaviour
     }
     IEnumerator PlayerTurn()
     {
+        //player regen cost
+        //attack
+        //action
         Debug.Log("Player Turn");
         yield return null;  
 
@@ -42,9 +45,9 @@ public class TurnBaseGod : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         enemy.defense = enemy.defualtdefense;
-        enemy.cost += 1;
+        enemy.AddCost(enemy.costRegen);
         Debug.Log("Enemy Turn");
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(2f);
         StartCoroutine(Enemyattack());
         
 
@@ -65,10 +68,10 @@ public class TurnBaseGod : MonoBehaviour
     {
         while (state == TurnBaseGodState.EnemyTurn)
         {
-            int randomaction = UnityEngine.Random.Range(0, 10);
             if (enemy.cost > 0)
             {
-                if (randomaction <= 1)
+                float randomaction = UnityEngine.Random.Range(0, 10);
+                if (randomaction <= 0.5f)
                 {
                     Debug.Log("Endturn");
                     state = TurnBaseGodState.PlayerTurn;
@@ -79,6 +82,7 @@ public class TurnBaseGod : MonoBehaviour
                 {
                     Debug.Log("Defend");
                     enemy.defense += 2;
+                    enemy.cost -= 1;    
                     //run defend code
 
 
@@ -96,7 +100,7 @@ public class TurnBaseGod : MonoBehaviour
                 state = TurnBaseGodState.PlayerTurn;
                 StartCoroutine(PlayerTurn());
             }
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(2f);
         }
        
             
