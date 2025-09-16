@@ -3,12 +3,14 @@ using UnityEngine;
 
 public class JumpController : MonoBehaviour
 {
+    #region Jump Setting
     [BoxGroup("Movement Stats"), SerializeReference] public KeyCode jumpKey = KeyCode.Space;
     [BoxGroup("Movement Stats"), SerializeReference] public float jumpForce = 5f;
 
     [Foldout("Ground", true)] public Transform groundCheck;
     [Foldout("Ground", true)] public float groundRadius = 0.25f;
     [Foldout("Ground", true)] public LayerMask groundLayer;
+    #endregion
 
     #region Bool
     [Foldout("Bool", true)] public bool isGrounded;
@@ -20,6 +22,7 @@ public class JumpController : MonoBehaviour
     Animator am;
     #endregion
 
+    #region Unity Methods
     void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -33,11 +36,9 @@ public class JumpController : MonoBehaviour
             jumpPressed = true;
             CheckJump();
     }
+    #endregion
 
-    void FixedUpdate()
-    {
-        
-    }
+    #region Jump Methods
     void CheckJump()
     {
         if (isGrounded && jumpPressed)
@@ -54,11 +55,15 @@ public class JumpController : MonoBehaviour
             return;
         }
     }
+    #endregion
+
+    #region Gizmos
     void OnDrawGizmosSelected()
     {
         if (!groundCheck) return;
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(groundCheck.position, groundRadius);
     }
+    #endregion
 
 }
