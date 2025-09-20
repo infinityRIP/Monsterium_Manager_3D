@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d04c6c78b50e4254a95ee24a4ccb6426, type: 3}
   m_Name: Enemy
   m_EditorClassIdentifier: 
-  enemyName: 
-  defense: 0
-  enemyPrefab: {fileID: 0}
-  currentHealth: 0
-  maxHealth: 0
+  enemyPrefab: {fileID: -2253911629886400664, guid: 371a321e7cbf6564584628ef32445cc0, type: 3}
+  enemyName: Slime
+  defense: 10
+  defualtdefense: 10
+  costRegen: 2
+  currentHealth: 100
+  maxHealth: 100
+  currentcost: 1
