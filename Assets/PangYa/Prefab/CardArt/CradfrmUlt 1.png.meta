@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 4f5f9eddf22e9fa4e8cc45ae240ebf54
+guid: 087b3b92dc2850340979be42ec27f7b0
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -97,13 +97,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: CardCounterFrame_0
+      name: CradfrmUlt 1_0
       rect:
         serializedVersion: 2
-        x: 25
-        y: 10
-        width: 350
-        height: 480
+        x: 4
+        y: 2
+        width: 72
+        height: 96
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -112,8 +112,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 740f10c14c5e2f444ad61ff524d9bd3b
-      internalID: -1707100983
+      spriteID: d24c7004437f396409053e3b59ab00d3
+      internalID: -554780896
       vertices: []
       indices: 
       edges: []
@@ -122,7 +122,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: bd7942d318c21c84a856e0ed3a13dc6c
     internalID: 0
     vertices: []
     indices: 
@@ -132,7 +132,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      CardCounterFrame_0: -1707100983
+      CradfrmUlt 1_0: -554780896
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

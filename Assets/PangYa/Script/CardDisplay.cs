@@ -18,7 +18,7 @@ public class CardDisplay : MonoBehaviour
     public TextMeshProUGUI costText;
     public Image artworkImage;
 
-    // Image that will show the type-specific frame/icon
+
     public Image typeFrameImage;
 
     [Header("Type → Sprite Mapping")]
@@ -56,6 +56,8 @@ public class CardDisplay : MonoBehaviour
         cardBackGround.sprite  = _cardData.CardBG;
         costText.text          = _cardData.Cost.ToString();
         artworkImage.sprite    = _cardData.CardArt;
+        typeFrameImage.sprite =  _cardData.CardFrame;
+
 
         if (typeFrameImage && _dict != null && _dict.TryGetValue(_cardData.CardType, out var frame))
             typeFrameImage.sprite = frame;

@@ -5,6 +5,5 @@ public enum CardType
     Skill,
     Defense,
     Ultimate,
-
 }
 

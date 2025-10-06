@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardName: Nigga
   cost: 2
-  cardBG: {fileID: 21300000, guid: 26f69132246d7484dbb96d3d315c9555, type: 3}
+  cardBG: {fileID: 21300000, guid: 836994313ec4b264287578e5d0dd8223, type: 3}
   cardArt: {fileID: 0}
-  cardFrame: {fileID: 21300000, guid: 4f5f9eddf22e9fa4e8cc45ae240ebf54, type: 3}
-  cardType: 2
+  cardFrame: {fileID: -1707100983, guid: 4f5f9eddf22e9fa4e8cc45ae240ebf54, type: 3}
+  cardType: 3
   effects: []
+  autoAssignBGFromType: 1
+  bgLibrary: {fileID: 11400000, guid: 5b6868207d17f224985122567dfe2f24, type: 2}

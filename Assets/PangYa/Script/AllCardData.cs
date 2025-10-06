@@ -19,7 +19,11 @@ public class AllCardData : ScriptableObject
 
     [Header("Card Logic")]
     [SerializeField] private CardType cardType;
-    [SerializeField] private List<CardEffect> effects = new List<CardEffect>(); // init so it's never null
+    [SerializeField] private List<CardEffect> effects = new List<CardEffect>();
+    // --- Auto background assignment ---
+    [SerializeField] private bool autoAssignBGFromType = true;
+    [SerializeField] private CardTypeBackgroundLibrary bgLibrary;
+ // init so it's never null
 
     // Properties
     public string CardName { get => cardName; set => cardName = value; }
@@ -32,6 +36,22 @@ public class AllCardData : ScriptableObject
 
     // This method would be called by the Player when the card is played.
     // It iterates through all the effects and executes them.
+
+
+    private void OnValidate()
+{
+    // Assign BG automatically whenever something changes in the asset inspector
+    if (autoAssignBGFromType && bgLibrary != null)
+    {
+        var s = bgLibrary.GetBG(this.CardType); // uses your existing CardType property
+        if (s != null)
+        {
+            cardBG = s; // set the private backing field
+        }
+        // Optional: else leave current BG as-is or you can clear it.
+    }
+}
+
    public void Play(Character caster, Character target)
     {
         if (effects == null) return;
