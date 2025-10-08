@@ -48,18 +48,45 @@ public class CardDisplay : MonoBehaviour
         }
     }
 
+    
+    
+    public void Setup(AllCardData data) => CardData = data;
+ 
+    public void Setup(ICardView vm)
+    {
+    if (vm == null) return;
+    if (nameText)         nameText.text = vm.Name;
+    if (costText)         costText.text = vm.Cost.ToString();
+    if (artworkImage)     artworkImage.sprite = vm.Artwork;
+    if (cardBackGround)   cardBackGround.sprite = vm.Background;
+    if (typeFrameImage)
+    {
+        // Prefer explicit frame if present, else use your type→sprite mapping
+        typeFrameImage.sprite = vm.Frame;
+        if (typeFrameImage.sprite == null && _dict != null &&    
+            _dict.TryGetValue(vm.Type, out var mapped))
+            typeFrameImage.sprite = mapped;                 
+    }
+    }
+
     private void UpdateDisplay()
     {
         if (_cardData == null) return;
 
-        nameText.text          = _cardData.CardName;
-        cardBackGround.sprite  = _cardData.CardBG;
-        costText.text          = _cardData.Cost.ToString();
-        artworkImage.sprite    = _cardData.CardArt;
-        typeFrameImage.sprite =  _cardData.CardFrame;
+        nameText.text = _cardData.CardName;
+        cardBackGround.sprite = _cardData.CardBG;
+        costText.text = _cardData.Cost.ToString();
+        artworkImage.sprite = _cardData.CardArt;
+        typeFrameImage.sprite = _cardData.CardFrame;
 
 
         if (typeFrameImage && _dict != null && _dict.TryGetValue(_cardData.CardType, out var frame))
             typeFrameImage.sprite = frame;
+
+        #if UNITY_EDITOR
+        Debug.Log($"[CardDisplay] UpdateDisplay: name={_cardData?.CardName ?? "NULL"}, " +
+        $"BG={(bool)_cardData?.CardBG}, Art={(bool)_cardData?.CardArt}, Frame={(bool)_cardData?.CardFrame}");
+        #endif
+
     }
 }

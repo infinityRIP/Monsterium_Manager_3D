@@ -23,7 +23,7 @@ namespace Game.Patterns
         }
     }
 
-    public abstract class PersistentSingleton<T> : Singleton<T> where T : MonoBehaviour
+    public abstract class PersistentSingleton<J> : Singleton<J> where J : MonoBehaviour
     {
         protected override void Awake()
         {
