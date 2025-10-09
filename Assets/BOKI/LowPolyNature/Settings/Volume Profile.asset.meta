@@ -1,15 +1,8 @@
 fileFormatVersion: 2
-guid: b8e623484b1e56e4689ba53b1d539e1d
+guid: a51030ff95ebbad498d86e0e2c64296f
 NativeFormatImporter:
   externalObjects: {}
-  mainObjectFileID: 11400000
+  mainObjectFileID: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 206385
-  packageName: BOKI - Low Poly Nature
-  packageVersion: 1.0
-  assetPath: Assets/BOKI/LowPolyNature/Settings/Volume Profile.asset
-  uploadId: 461542
