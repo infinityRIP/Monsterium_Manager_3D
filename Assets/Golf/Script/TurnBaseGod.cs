@@ -18,7 +18,7 @@ public class TurnBaseGod : MonoBehaviour
     public Transform enemySpawnPos;
     public Transform playerSpawnPos;
     [Header("State")]
-    TurnBaseGodState state;
+    public static TurnBaseGodState state;
     void Start()
     {
        enemy.cost = 3;
