@@ -140,7 +140,7 @@ Material:
     - _ChromaticAberration: 0.1
     - _CousticOffset: 0
     - _Cutoff: 0.5
-    - _Depth: 2.1
+    - _Depth: -3
     - _DetailNormalMapScale: 1
     - _DistanceFade: 200
     - _DistanceFadeOffset: 4000
@@ -158,9 +158,9 @@ Material:
     - _Float3: 0.744
     - _FoamContrast: 10
     - _FoamDepth: 0
-    - _FoamDistance: 3.8
+    - _FoamDistance: 0
     - _FoamFalloff: 0
-    - _FoamPower: 0.021
+    - _FoamPower: 0.064
     - _FoamScale: 2
     - _FoamSmoothness: 0
     - _FoamSpeed: 2
@@ -177,7 +177,7 @@ Material:
     - _Min: 0
     - _Mode: 0
     - _MultiplyOpacity: 1
-    - _NormalPower: 0.513
+    - _NormalPower: 0.417
     - _NormalPower1: 1
     - _NormalScale: 2
     - _NormalSpeed: 1
@@ -237,3 +237,4 @@ Material:
     - _WavesScaleOLD: {r: 1, g: 1, b: 0, a: 0}
     - _WavesScaleXY: {r: 0.1, g: 0.1, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
