@@ -57,11 +57,12 @@ public class Player : Singleton<Player>
         
     void Update()
     {
-        am.SetFloat("Speed", new Vector2(motion.x, motion.z).magnitude);
+        UpdateAnimDirection();
         ApplyGravity();
         InputManagement();
         Run();
         Move();
+
 
     }
     #endregion
@@ -122,5 +123,48 @@ public class Player : Singleton<Player>
             am.SetBool("isRunning", false);
         }
     }
+    void UpdateAnimDirection()
+    {
+        // ความเร็วจริงจาก CC (ปลอดภัยกว่าอ่านจากตัวแปร)
+        Vector3 vel = controller.velocity;
+        am.SetFloat("Speed", new Vector2(vel.x, vel.z).magnitude);
+
+        // ถ้าไม่ขยับ ไม่ต้องจัดหมวด
+        if (vel.sqrMagnitude < 0.0001f)
+        {
+            am.SetBool("Side", false);
+            am.SetBool("Up", false);
+            am.SetBool("Down", false);
+            return;
+        }
+
+        // สร้างแกนตามกล้อง (บนระนาบ XZ)
+        Vector3 camF = cameraTransform.forward; camF.y = 0; camF.Normalize();
+        Vector3 camR = cameraTransform.right; camR.y = 0; camR.Normalize();
+
+        // เวคเตอร์การเคลื่อนที่แนวนอน (normalize เพื่อเทียบมุม)
+        Vector3 hv = vel; hv.y = 0;
+        if (hv.sqrMagnitude > 0.0001f) hv.Normalize();
+
+        // โปรเจกต์ดูว่าไปทางไหนมากกว่า
+        float dF = Vector3.Dot(hv, camF); // + ขึ้น, - ลง
+        float dR = Vector3.Dot(hv, camR); // + ขวา, - ซ้าย
+
+        float absF = Mathf.Abs(dF);
+        float absR = Mathf.Abs(dR);
+        const float EPS = 0.15f; // deadzone เพื่อกันสั่น
+
+        bool isSide = absR > absF && absR > EPS;
+        bool isUp = absF >= absR && dF > EPS;
+        bool isDown = absF >= absR && dF < -EPS;
+
+        am.SetBool("Side", isSide);
+        am.SetBool("Up", isUp);
+        am.SetBool("Down", isDown);
+
+        // ถ้าใช้ SpriteRenderer แล้วอยากหันซ้าย/ขวา
+        if (sr != null && isSide) sr.flipX = (dR < 0f); // true = หันซ้าย
+    }
+
     #endregion
 }

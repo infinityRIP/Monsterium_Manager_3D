@@ -1,40 +1,46 @@
 using UnityEngine;
 
+[DefaultExecutionOrder(100)] 
 public class PlayerAnimation : MonoBehaviour
 {
+    [SerializeField] Transform cameraTransform;   
+    [SerializeField] float flipDeadzone = 0.05f; 
+
     Animator am;
-    Player Pl;
     SpriteRenderer sr;
-    string currentAnimation = " ";
-    void Start()
+    string currentAnimation = "";
+
+    void Awake()
     {
         am = GetComponent<Animator>();
-        Pl = GetComponent<Player>();
         sr = GetComponent<SpriteRenderer>();
+        if (!cameraTransform) cameraTransform = Camera.main ? Camera.main.transform : null;
     }
 
-    // Update is called once per frame
     void Update()
     {
-      SpriteDirectionChecker();
+        SpriteDirectionChecker();
     }
+
     void SpriteDirectionChecker()
     {
-        if (Pl.motion.x < 0)
-        {
-            sr.flipX = true;
-        }
-        else
-        {
-            sr.flipX = false;
-        }
+        Vector3 hv = Player.Instance.motion;
+        hv.y = 0f;
+
+        if (hv.sqrMagnitude < flipDeadzone * flipDeadzone) return; 
+
+        Vector3 camRight = cameraTransform ? cameraTransform.right : Vector3.right;
+        camRight.y = 0f; camRight.Normalize();
+        hv.Normalize();
+
+        float side = Vector3.Dot(hv, camRight);
+        sr.flipX = side < 0f;
     }
+
     public void ChangeAnimation(string animation)
     {
-        if (currentAnimation != animation)
-        {
-            am.Play(currentAnimation);
-        }
-
+        if (string.IsNullOrEmpty(animation) || currentAnimation == animation) return;
+        am.Play(animation);           
+        currentAnimation = animation; 
     }
 }
