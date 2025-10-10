@@ -1,62 +1,104 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Splines;
 using DG.Tweening;
 
 public class HandViewManager : MonoBehaviour
-
 {
-    // at top-level inside the class:
-    private readonly HashSet<CardDisplay> _locked = new();
-    public void LockCard(CardDisplay c)   { if (c) _locked.Add(c); }
-    public void UnlockCard(CardDisplay c) { if (c) _locked.Remove(c); }
+    [Header("Wires")]
+    [SerializeField] private CardContainer container;   // Hand object with CardContainer
+    [SerializeField] private CardDisplay   cardPrefab;  // Prefab that has CardDisplay
+    [SerializeField] private Transform     deckOrigin;  // Where cards fly in from
 
+    [Header("Entry Animation")]
+    [SerializeField] private EntryStyle entryStyle = EntryStyle.Fly;
+    [SerializeField] private float duration = 0.40f;
+    [SerializeField] private Ease  ease     = Ease.OutCubic;
+    [SerializeField] private float arcHeight = 0.6f;     // for Jump/Bezier
+    [SerializeField, Range(3, 20)] private int bezierSamples = 8;
 
-    [SerializeField] private SplineContainer splineContainer;
-    private readonly List<CardDisplay> _cards = new();
-
-    public IEnumerator AddCard(CardDisplay card)
+    /// <summary>Spawn 1 card: animate, then hand off to CardContainer.</summary>
+    public IEnumerator Spawn(AllCardData data)
     {
-        // keep world-position but share space with hand & spline
-        card.transform.SetParent(transform, true);
-        _cards.Add(card);
-        yield return UpdateCardPositions(0.15f);
+        if (!ValidateWires(data)) yield break;
+
+        // 1) Spawn at deck (or near hand if no deckOrigin)
+        Vector3 startPos = deckOrigin ? deckOrigin.position
+                                      : container.transform.position + Vector3.up * 0.2f;
+        Quaternion startRot = deckOrigin ? deckOrigin.rotation : container.transform.rotation;
+
+        CardDisplay view = Instantiate(cardPrefab, startPos, startRot);
+
+        // Your CardDisplay exposes Setup(AllCardData) which updates the visuals. :contentReference[oaicite:2]{index=2}
+        view.Setup(data);
+
+        // Small pop
+        view.transform.localScale = Vector3.one * 0.95f;
+
+        // 2) Animate towards the hand (container center)
+        Vector3 endPos = container.transform.position;
+        yield return PlayEntry(view.transform, startPos, endPos);
+
+        // 3) Parent under the container (keep world pose). CardContainer now controls layout.
+        view.transform.SetParent(container.transform, true);
     }
-    
-    
 
-    private IEnumerator UpdateCardPositions(float duration)
+    /// <summary>Spawn multiple cards with a small stagger.</summary>
+    public IEnumerator SpawnMany(AllCardData[] cards, float stagger = 0.08f)
     {
-        if (_cards.Count == 0) yield break;
-
-        float cardSpacing = 1f / 10f; // 10 slots across 0..1
-        float firstCardPos = 0.5f - (_cards.Count - 1) * cardSpacing / 2f;
-
-        Spline spline = splineContainer.Spline;
-        
-
-        for (int i = 0; i < _cards.Count; i++)
+        if (cards == null || cards.Length == 0) yield break;
+        for (int i = 0; i < cards.Length; i++)
         {
-    if (_locked.Contains(_cards[i])) continue;  // <-- skip hovered
-
-        float p = Mathf.Clamp01(firstCardPos + i * cardSpacing);
-        Vector3 splinePos = spline.EvaluatePosition(p);
-        Vector3 forward   = spline.EvaluateTangent(p);
-        Vector3 up        = spline.EvaluateUpVector(p);
-        Quaternion rotation = Quaternion.LookRotation(-up, Vector3.Cross(-up, forward).normalized);
-
-        var t = _cards[i].transform;
-        t.DOKill();
-        t.DOMove(splinePos + transform.position + 0.01f * Vector3.back, duration);
-        t.DORotate(rotation.eulerAngles, duration);
+            yield return Spawn(cards[i]);
+            if (stagger > 0f && i < cards.Length - 1)
+                yield return new WaitForSeconds(stagger);
         }
-
-
-
-        
-        
-
-        yield return new WaitForSeconds(duration);
     }
+
+    // ---------------- internals ----------------
+
+    private IEnumerator PlayEntry(Transform t, Vector3 a, Vector3 c)
+    {
+        t.DOKill();
+        switch (entryStyle)
+        {
+            case EntryStyle.Fly:
+                yield return t.DOMove(c, duration).SetEase(ease).WaitForCompletion();
+                break;
+
+            case EntryStyle.Jump:
+                yield return t.DOJump(c, arcHeight, 1, duration).SetEase(ease).WaitForCompletion();
+                break;
+
+            case EntryStyle.Bezier:
+                Vector3 mid = Vector3.Lerp(a, c, 0.5f) + Vector3.up * arcHeight;
+                Vector3[] path = BuildQuadratic(a, mid, c, bezierSamples);
+                yield return t.DOPath(path, duration, PathType.CatmullRom)
+                              .SetEase(ease)
+                              .WaitForCompletion();
+                break;
+        }
+        yield return t.DOScale(1f, 0.10f).SetEase(Ease.OutSine).WaitForCompletion();
+    }
+
+    private Vector3[] BuildQuadratic(Vector3 a, Vector3 b, Vector3 c, int samples)
+    {
+        samples = Mathf.Max(3, samples);
+        var pts = new Vector3[samples];
+        for (int i = 0; i < samples; i++)
+        {
+            float t = i / (samples - 1f);
+            pts[i] = (1 - t) * (1 - t) * a + 2 * (1 - t) * t * b + t * t * c;
+        }
+        return pts;
+    }
+
+    private bool ValidateWires(AllCardData data)
+    {
+        if (!container)   { Debug.LogWarning("[HandViewManager] Missing CardContainer."); return false; }
+        if (!cardPrefab)  { Debug.LogWarning("[HandViewManager] Missing CardDisplay prefab."); return false; }
+        if (!data)        { Debug.LogWarning("[HandViewManager] CardData is null."); return false; }
+        return true;
+    }
+
+    public enum EntryStyle { Fly, Jump, Bezier }
 }

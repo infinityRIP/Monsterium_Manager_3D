@@ -141,8 +141,6 @@ GameObject:
   m_Component:
   - component: {fileID: 768068271844992332}
   - component: {fileID: 5990894917424441146}
-  - component: {fileID: 4260663574619179578}
-  - component: {fileID: -6134176201943428594}
   m_Layer: 5
   m_Name: CardPrefab
   m_TagString: Untagged
@@ -192,34 +190,6 @@ MonoBehaviour:
   artworkImage: {fileID: 8355648908890043335}
   typeFrameImage: {fileID: 1151627444947449207}
   typeSprites: []
---- !u!114 &4260663574619179578
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3796440494511377258}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29ec4bcc7af0e0e4ea1581baa588a760, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &-6134176201943428594
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3796440494511377258}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ab069857a47c0c4193d928ad20c1839, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  liftPixels: 60
-  scaleOnHover: 1.12
-  tiltDegrees: 0
-  dur: 0.1
 --- !u!1 &4385738642500145018
 GameObject:
   m_ObjectHideFlags: 0
@@ -654,7 +624,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 38.975235, y: -170.15256}
+  m_AnchoredPosition: {x: 38.975235, y: -172.4}
   m_SizeDelta: {x: 171.4693, y: 31.9504}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6217674318366271444
@@ -687,8 +657,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Card Name
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ecd046fa8f5436458d28b6007f1fffe, type: 2}
-  m_sharedMaterial: {fileID: 6321008981000973886, guid: 2ecd046fa8f5436458d28b6007f1fffe, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 04df8b65cbb659f4080ee4c980f662e7, type: 2}
+  m_sharedMaterial: {fileID: 2432261793813159191, guid: 04df8b65cbb659f4080ee4c980f662e7, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

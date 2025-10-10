@@ -3,58 +3,53 @@ using UnityEngine;
 
 public class TestSystem : MonoBehaviour
 {
-    [SerializeField] private HandViewManager handView;
-    [SerializeField] private Transform handParent;
+    [Header("Refs")]
+    [SerializeField] private HandViewManager hand;   // <- drag the component on CardViewCreator
     [SerializeField] private AllCardData testCardData;
 
-    private bool drawnThisTurn = false;
-    private bool firstturn;
+    [Header("First turn draw")]
+    [SerializeField] private int   cardsOnFirstTurn = 5;
+    [SerializeField] private float firstTurnStagger = 0.12f;
 
-    void Start()
+    private bool drawnThisTurn;
+    private bool firstTurn = true;
+
+    private void Start()
     {
-        firstturn = true;
-        StartCoroutine(FirstTurn());
+        StartCoroutine(DoFirstTurn());
     }
 
-    void Update()
+    private void Update()
     {
-        // Only allow drawing when it's the player's turn and not already drawn
-        if (TurnBaseGod.state == TurnBaseGodState.PlayerTurn && !drawnThisTurn && !firstturn)
+        // One draw per player turn (after the first turn is finished)
+        if (TurnBaseGod.state == TurnBaseGodState.PlayerTurn)
         {
-             DrawCard();
-             drawnThisTurn = true;
-            
+            if (!firstTurn && !drawnThisTurn)
+            {
+                StartCoroutine(hand.Spawn(testCardData)); // animate in, then CardContainer takes over
+                drawnThisTurn = true;
+                Debug.Log("Player drew a card!");
+            }
         }
-
-        // Reset draw flag when it's not the player's turn anymore
-        if (TurnBaseGod.state != TurnBaseGodState.PlayerTurn)
+        else
+        {
+            // Reset when turn changes away from player
             drawnThisTurn = false;
+        }
     }
 
-    private IEnumerator FirstTurn()
+    private IEnumerator DoFirstTurn()
     {
-        yield return new WaitForSeconds(1f);
+        // small delay so everything initializes
+        yield return new WaitForSeconds(0.5f);
 
-        // Draw 5 cards at start
-        for (int i = 0; i < 5; i++)
+        // Draw N cards with a little stagger
+        for (int i = 0; i < cardsOnFirstTurn; i++)
         {
-            var view = CardViewCreator.Instance.CreateCardView(transform.position, Quaternion.identity, handParent);
-            view.CardData = testCardData;
-            yield return handView.StartCoroutine(handView.AddCard(view));
-            yield return new WaitForSeconds(0.2f);
+            yield return hand.StartCoroutine(hand.Spawn(testCardData));
+            if (firstTurnStagger > 0f) yield return new WaitForSeconds(firstTurnStagger);
         }
 
-        yield return new WaitForSeconds(1f);
-        DrawCard(); // Optional extra draw after setup
-        firstturn = false;
-    }
-
-    private void DrawCard()
-    {
-        var view = CardViewCreator.Instance.CreateCardView(transform.position, Quaternion.identity, handParent);
-        view.CardData = testCardData;
-        StartCoroutine(handView.AddCard(view));
-        drawnThisTurn = true;
-        Debug.Log("Player drew a card!");
+        firstTurn = false;
     }
 }
