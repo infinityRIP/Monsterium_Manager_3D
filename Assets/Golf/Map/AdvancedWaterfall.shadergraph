@@ -5823,8 +5823,8 @@
     "m_ObjectId": "291d5db5936f4046a76bf63c00b10f91",
     "m_Title": "Foam Line with noise and cutoffs",
     "m_Position": {
-        "x": 2637.00048828125,
-        "y": 1690.99951171875
+        "x": 2637.0,
+        "y": 1691.0
     }
 }
 
@@ -8588,7 +8588,7 @@
     "m_Title": "Triplanar Lerp Together Top and Side Textures Based on World NOrmals",
     "m_Position": {
         "x": -1740.0,
-        "y": 699.9999389648438
+        "y": 700.0
     }
 }
 
@@ -11167,8 +11167,8 @@
     "m_ObjectId": "7d2b3344fd6c4f79ae1772a1980d9989",
     "m_Title": "Foam Line",
     "m_Position": {
-        "x": 832.0004272460938,
-        "y": 1312.99951171875
+        "x": 832.0,
+        "y": 1313.0
     }
 }
 
@@ -12267,8 +12267,8 @@
     "m_ObjectId": "8bc7551482dd4596b96d7b9ba9246339",
     "m_Title": "Top/Side Shine/Foam",
     "m_Position": {
-        "x": -274.9997863769531,
-        "y": -2604.000244140625
+        "x": -275.0,
+        "y": -2604.0
     }
 }
 
@@ -17577,7 +17577,7 @@
     "m_ObjectId": "dfc3218011a94e42ad6fa239c7cb2840",
     "m_Title": "Reflections",
     "m_Position": {
-        "x": 1370.0003662109375,
+        "x": 1370.0,
         "y": 2913.0
     }
 }
@@ -17605,8 +17605,8 @@
     "m_ObjectId": "e108ccec03ff49a78e2076f06d2115ad",
     "m_Title": "Top Texture",
     "m_Position": {
-        "x": -1658.0001220703125,
-        "y": -1221.000244140625
+        "x": -1658.0,
+        "y": -1221.0
     }
 }
 
@@ -19296,7 +19296,7 @@
     "m_Title": "Normals",
     "m_Position": {
         "x": 2245.0,
-        "y": -602.9998168945313
+        "y": -603.0
     }
 }
 
@@ -19306,7 +19306,7 @@
     "m_ObjectId": "fb1544da865c40969b78c87523bdcb3c",
     "m_Title": "Depth Colors",
     "m_Position": {
-        "x": 2101.00048828125,
+        "x": 2101.0,
         "y": 1092.0
     }
 }

@@ -158,9 +158,9 @@ Material:
     - _Float3: 0.744
     - _FoamContrast: 10
     - _FoamDepth: 0
-    - _FoamDistance: 4.9
+    - _FoamDistance: 3.7
     - _FoamFalloff: 0
-    - _FoamPower: 1
+    - _FoamPower: 0.552
     - _FoamScale: 3
     - _FoamSmoothness: 0
     - _FoamSpeed: 0.5
@@ -177,7 +177,7 @@ Material:
     - _Min: 0
     - _Mode: 0
     - _MultiplyOpacity: 1
-    - _NormalPower: 0.067
+    - _NormalPower: 0.178
     - _NormalPower1: 1
     - _NormalScale: 2
     - _NormalSpeed: 1
@@ -207,7 +207,7 @@ Material:
     - _WaterSpecular: 0
     - _WaterSpeed: 0
     - _WavesHeight: 0.2
-    - _WavesScale: 5
+    - _WavesScale: 3
     - _WavesSpeed: 15
     - _WavesTiling: 0.5
     - _ZWrite: 1
