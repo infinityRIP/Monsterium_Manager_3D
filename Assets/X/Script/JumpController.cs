@@ -20,6 +20,7 @@ public class JumpController : MonoBehaviour
     #region Component
     Rigidbody rb;
     Animator am;
+    CharacterController cc;
     #endregion
 
     #region Unity Methods
@@ -27,6 +28,7 @@ public class JumpController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         am = GetComponent<Animator>();
+        cc = GetComponent<CharacterController>();
     }
     void Update()
     {
@@ -45,10 +47,7 @@ public class JumpController : MonoBehaviour
         {
             jumpPressed = false;
             am?.SetTrigger("Jump");
-            var v = rb.linearVelocity;
-            v.y = 0f;
-            rb.linearVelocity = v;
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
+            Player.Instance.verticalVelocity += jumpForce;
         }
         else
         {

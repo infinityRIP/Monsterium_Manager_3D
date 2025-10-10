@@ -20,7 +20,7 @@ public class PlayerAnimation : MonoBehaviour
     }
     void SpriteDirectionChecker()
     {
-        if (Pl.moveDir.x < 0)
+        if (Pl.motion.x < 0)
         {
             sr.flipX = true;
         }
