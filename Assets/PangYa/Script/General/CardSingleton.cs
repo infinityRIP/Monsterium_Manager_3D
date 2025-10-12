@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.Patterns 
 {
-    public abstract class Singleton<J> : MonoBehaviour where J : MonoBehaviour
+    public abstract class CardSingleton<J> : MonoBehaviour where J : MonoBehaviour
     {
         public static J Instance { get; private set; }
 
@@ -23,7 +23,7 @@ namespace Game.Patterns
         }
     }
 
-    public abstract class PersistentSingleton<J> : Singleton<J> where J : MonoBehaviour
+    public abstract class PersistentSingleton<J> : CardSingleton<J> where J : MonoBehaviour
     {
         protected override void Awake()
         {
