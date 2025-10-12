@@ -1,25 +1,15 @@
 using Game.Stats;
 using NaughtyAttributes;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
-public class Player : Singleton<Player>
+public class Player : PlayerSingleton<Player>
 {
     #region Stats Setting 
 
-    [Serializable]
-    public struct BaseEntry { public PlayerStatId id; public float baseValue; }
-    public List<BaseEntry> bases = new()
-    {
-        new BaseEntry{ id=PlayerStatId.MaxHp,      baseValue=100 },
-        new BaseEntry{ id=PlayerStatId.Attack,     baseValue=5  },
-        new BaseEntry{ id=PlayerStatId.Defense,    baseValue=1   },
-        new BaseEntry{ id=PlayerStatId.Persuasion, baseValue=1  },
-    };
-
-    public float CurrentHp { get; private set; }
+    public Stat MaxHealth;
+    public Stat Attack;
+    public Stat Defense;
+    public Stat Persuasion;
 
     #endregion
 
@@ -165,6 +155,19 @@ public class Player : Singleton<Player>
         // ถ้าใช้ SpriteRenderer แล้วอยากหันซ้าย/ขวา
         if (sr != null && isSide) sr.flipX = (dR < 0f); // true = หันซ้าย
     }
+
+    #endregion
+
+    #region Stats Mothods
+
+    public Player(float baseValue)
+    {
+        
+    }
+
+
+
+
 
     #endregion
 }

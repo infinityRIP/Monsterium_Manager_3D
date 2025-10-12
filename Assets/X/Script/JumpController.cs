@@ -35,8 +35,12 @@ public class JumpController : MonoBehaviour
         isGrounded = Physics.CheckSphere(groundCheck.position, groundRadius, groundLayer, QueryTriggerInteraction.Ignore);
 
         if (Input.GetKeyDown(jumpKey))
+        {
+            am?.SetTrigger("Jump");
             jumpPressed = true;
             CheckJump();
+        }
+
     }
     #endregion
 
@@ -46,7 +50,6 @@ public class JumpController : MonoBehaviour
         if (isGrounded && jumpPressed)
         {
             jumpPressed = false;
-            am?.SetTrigger("Jump");
             Player.Instance.verticalVelocity += jumpForce;
         }
         else

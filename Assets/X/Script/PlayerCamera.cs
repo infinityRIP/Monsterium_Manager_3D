@@ -24,17 +24,4 @@ public class PlayerCamera : MonoBehaviour
         transform.position = desiredPosition;
         transform.rotation = rotation;
     }
-    //void LateUpdate()
-    //{
-        
-    //}
-    //private void Update()
-    //{
-    //    turn.x = Input.GetAxis("Mouse X") * sensitivity;
-    //    turn.y = Input.GetAxis("Mouse Y") * sensitivity;
-    //    this.gameObject.transform.localRotation = Quaternion.Euler(0, turn.x, 0);
-    //    transform.localRotation = Quaternion.Euler(-turn.y, turn.x, 0);
-
-
-    //}
 }
