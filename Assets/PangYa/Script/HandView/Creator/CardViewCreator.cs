@@ -2,7 +2,7 @@ using UnityEngine;
 using DG.Tweening;
 using Game.Patterns; // your Singleton<T>
 
-public class CardViewCreator : Singleton<CardViewCreator>
+public class CardViewCreator : PersistentSingleton<CardViewCreator>
 {
     [SerializeField] private CardDisplay cardPrefab;
     [SerializeField] private Transform defaultParent; // HandRoot under Canvas
