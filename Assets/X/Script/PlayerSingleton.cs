@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // https://gist.github.com/mstevenson/4325117
-public class PlayerSingleton<T> : MonoBehaviour
+public class Singleton<T> : MonoBehaviour
     where T : Component
 {
     private static T _instance;
@@ -31,7 +31,7 @@ public class PlayerSingleton<T> : MonoBehaviour
 }
 
 
-public class PlayerSingletonPersistent<T> : MonoBehaviour
+public class SingletonPersistent<T> : MonoBehaviour
     where T : Component
 {
     public static T Instance { get; private set; }

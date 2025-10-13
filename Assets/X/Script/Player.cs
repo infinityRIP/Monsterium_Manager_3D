@@ -2,7 +2,7 @@ using Game.Stats;
 using NaughtyAttributes;
 using UnityEngine;
 
-public class Player : PlayerSingleton<Player>
+public class Player : Singleton<Player>
 {
     #region Stats Setting 
 
@@ -10,6 +10,8 @@ public class Player : PlayerSingleton<Player>
     public Stat Attack;
     public Stat Defense;
     public Stat Persuasion;
+
+    public float currentHealth;
 
     #endregion
 
@@ -44,7 +46,16 @@ public class Player : PlayerSingleton<Player>
         am = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
     }
-        
+    private void Start()
+    {
+        MaxHealth.BaseValue = 100;
+        Attack.BaseValue = 10;
+        Defense.BaseValue = 10;
+        Persuasion.BaseValue = 10;
+
+        currentHealth = MaxHealth.BaseValue;
+    }
+
     void Update()
     {
         UpdateAnimDirection();
@@ -158,16 +169,4 @@ public class Player : PlayerSingleton<Player>
 
     #endregion
 
-    #region Stats Mothods
-
-    public Player(float baseValue)
-    {
-        
-    }
-
-
-
-
-
-    #endregion
 }

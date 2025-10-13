@@ -28,10 +28,26 @@ namespace Game.Stats
         protected readonly List<StatModifier> statModifiers;
         public readonly ReadOnlyCollection<StatModifier> StatModifiers;
 
+        private readonly Comparison<StatModifier> comparison;
+        private readonly PredicateClosoure predicateClosoure;
+
+        private class PredicateClosoure
+        {
+            public readonly Predicate<StatModifier> Predicate;
+            public object SourceToRemove;
+
+            public PredicateClosoure()
+            {
+                Predicate = modifier => modifier.Source == SourceToRemove;
+            }
+        }
+
         public Stat()
         {
             statModifiers = new List<StatModifier>();
             StatModifiers = statModifiers.AsReadOnly();
+            comparison = ComparedModifierOrder;
+            predicateClosoure = new PredicateClosoure();
         }
 
         public Stat(float baseValue) : this() 
@@ -58,19 +74,16 @@ namespace Game.Stats
 
         public virtual bool RemoveAllModifiersFromSource(object source)
         {
-            bool didRemove = false; 
+            predicateClosoure.SourceToRemove = source;
+            int numRemovals = statModifiers.RemoveAll(predicateClosoure.Predicate);
+            predicateClosoure.SourceToRemove = null;
 
-            for (int i = statModifiers.Count - 1; i >= 0; i--)
+            if (numRemovals > 0)
             {
-                if (statModifiers[i].Source == source)
-                {
-                    isDirty = true ;
-                    didRemove = true ;
-                    statModifiers.RemoveAt(i);
-                }
+                isDirty = true;
+                return true;
             }
-
-            return didRemove;
+            return false;
         }
         protected virtual int ComparedModifierOrder(StatModifier a, StatModifier b)
         {
@@ -88,6 +101,8 @@ namespace Game.Stats
         {
             float finalValue = BaseValue;
             float sumPercentAdd = 0;
+
+            statModifiers.Sort(comparison);
 
             for (int i = 0; i < statModifiers.Count; i++)
             {
