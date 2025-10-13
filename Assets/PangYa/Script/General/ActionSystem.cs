@@ -1,162 +1,125 @@
-// ActionSystem.cs
 using System;
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
-using Game.Patterns;   // your CardSingleton / PersistentSingleton
 
-/// <summary>
-/// Runs GameActions through PRE → PERFORM → POST phases with reaction chaining,
-/// per-type performers, and pre/post subscribers.
-/// </summary>
-public class ActionSystem : PersistentSingleton<ActionSystem>
+public class ActionSystem : Singleton<ActionSystem>
 {
-    // Pointer to the reaction list of the *current* phase (Pre / Perform / Post).
     private List<GameAction> reactions = null;
+    public bool isPerforming { get; private set; } = false;
 
-    public bool IsPerforming { get; private set; } = false;
+    private static Dictionary<Type, List<Action<GameAction>>> preSubs = new();
+    private static Dictionary<Type, List<Action<GameAction>>> postSubs = new();
+    private static Dictionary<Type, Func<GameAction, IEnumerator>> performers = new();
 
-    // Subscribers per action type (PRE/POST)
-    private static readonly Dictionary<Type, List<Action<GameAction>>> preSubs  = new();
-    private static readonly Dictionary<Type, List<Action<GameAction>>> postSubs = new();
+    public event Action OnPerformFinished = null;
 
-    // Performer coroutine per action type
-    private static readonly Dictionary<Type, Func<GameAction, IEnumerator>> performers = new();
-
-    // ---------- Public API --------------------------------------------------
-
-    /// <summary>
-    /// Enqueue a follow-up action for the *current* phase (called from performers/subscribers).
-    /// </summary>
-    /// 
-  
-    public void AddReaction(GameAction followUp)
+    public void Perform(GameAction action)
     {
-        if (reactions == null)
-        {
-            Debug.LogWarning("AddReaction was called outside of an action phase.");
-            return;
-        }
-        reactions.Add(followUp);
+        if (isPerforming) return;
+        isPerforming = true;
+        StartCoroutine(Flow(action));
     }
 
-    /// <summary>
-    /// Register the coroutine that performs a concrete action type.
-    /// </summary>
-    public static void AttachPerformer<J>(Func<J, IEnumerator> performer) where J : GameAction
+    public void AddReaction(GameAction gameAction)
     {
-        if (performer == null) throw new ArgumentNullException(nameof(performer));
-        performers[typeof(J)] = ga => performer((J)ga);
+        reactions.Add(gameAction);
     }
 
-    /// <summary>
-    /// Optionally remove a performer registration.
-    /// </summary>
-    public static void DetachPerformer<J>() where J : GameAction
+    private IEnumerator Flow(GameAction action, Action OnFlowFinished = null)
     {
-        performers.Remove(typeof(J));
-    }
-
-    /// <summary>
-    /// Subscribe a callback to PRE or POST for a given action type.
-    /// </summary>
-    public static void SubscribeReaction<J>(Action<J> callback, ReactionTiming timing) where J : GameAction
-    {
-        if (callback == null) throw new ArgumentNullException(nameof(callback));
-        var dict = timing == ReactionTiming.PRE ? preSubs : postSubs;
-        var key  = typeof(J);
-
-        if (!dict.TryGetValue(key, out var list))
-        {
-            list = new List<Action<GameAction>>();
-            dict[key] = list;
-        }
-
-        // Store a type-safe wrapper
-        list.Add(ga => callback((J)ga));
-    }
-
-    /// <summary>
-    /// Convenience: start a root action from anywhere (if an instance exists).
-    /// </summary>
-    public static void Do(GameAction root, Action onFinished = null)
-    {
-        if (!Instance) return;
-        Instance.Perform(root, onFinished);
-    }
-
-    /// <summary>
-    /// Start the 3-phase flow for a root action (non-coroutine entry like in the video).
-    /// </summary>
-    public void Perform(GameAction action, Action onFinished = null)
-    {
-        if (action == null) return;
-        if (IsPerforming) return; // video pattern: block re-entry
-
-        IsPerforming = true;
-        StartCoroutine(Flow(action, () =>
-        {
-            IsPerforming = false;
-            onFinished?.Invoke();
-        }));
-    }
-
-    // ---------- Flow --------------------------------------------------------
-
-    private IEnumerator Flow(GameAction action, Action onFlowFinished = null)
-    {
-        // ===== PRE =====
         reactions = action.PreReactions;
-        InvokeSubscribers(preSubs, action);
-        yield return DrainReactions();
+        PerformSubscribers(action, preSubs);
+        yield return PerformReactions();
 
-        // === PERFORM ===
-        reactions = action.PerformReactions;
-        if (performers.TryGetValue(action.GetType(), out var perf))
-            yield return perf(action);
-        else
-            Debug.LogWarning($"No performer registered for {action.GetType().Name}. Skipping PERFORM phase.");
-        yield return DrainReactions();
+        yield return PerformPerformer(action);
 
-        // ==== POST ====
         reactions = action.PostReactions;
-        InvokeSubscribers(postSubs, action);
-        yield return DrainReactions();
+        PerformSubscribers(action, postSubs);
+        yield return PerformReactions();
 
-        reactions = null; // clear pointer for safety
-        onFlowFinished?.Invoke();
+        OnFlowFinished?.Invoke();
+        isPerforming = false;
     }
 
-    /// <summary>
-    /// Drain the current phase’s reaction queue; new items appended during
-    /// execution are also processed (index-based loop).
-    /// </summary>
-    private IEnumerator DrainReactions()
+    private IEnumerator PerformPerformer(GameAction action)
     {
-        int i = 0;
-        while (i < reactions.Count)
+        Type type = action.GetType();
+        if (performers.ContainsKey(type))
         {
-            var next = reactions[i++];
-            yield return Flow(next);
+            yield return performers[type](action);
+        }
+        else
+        {
+            Debug.LogError($"No performer found for action type: {type}");
         }
     }
 
-    private static void InvokeSubscribers(Dictionary<Type, List<Action<GameAction>>> dict, GameAction action)
+    private void PerformSubscribers(GameAction gameAction, Dictionary<Type, List<Action<GameAction>>> subs)
     {
-        if (!dict.TryGetValue(action.GetType(), out var list)) return;
-
-        // Snapshot count so newly-added subs during iteration don’t execute immediately
-        for (int i = 0, n = list.Count; i < n; i++)
+        Type type = gameAction.GetType();
+        if (subs.ContainsKey(type))
         {
-            try { list[i]?.Invoke(action); }
-            catch (Exception ex) { Debug.LogException(ex); }
+            foreach (var sub in subs[type])
+            {
+                sub(gameAction);
+            }
         }
     }
-}
 
-/// <summary>Phase identifiers for reaction subscriptions.</summary>
-public enum ReactionTiming
-{
-    PRE,
-    POST
+    private IEnumerator PerformReactions()
+    {
+        foreach (var reaction in reactions)
+        {
+            yield return Flow(reaction);
+        }
+        reactions.Clear();
+    }
+
+    public static void AttachPerformer<T>(Func<T, IEnumerator> performer) where T : GameAction
+    {
+        Type type = typeof(T);
+        if (performers.ContainsKey(type))
+        {
+            Debug.LogWarning($"Performer already attached for action type: {type}. Overwriting.");
+            performers[type] = (action) => performer((T)action);
+        }
+        else
+        {
+            performers.Add(type, (action) => performer((T)action));
+        }
+    }
+
+    public static void DetachPerformer<T>() where T : GameAction
+    {
+        Type type = typeof(T);
+        if (performers.ContainsKey(type))
+        {
+            performers.Remove(type);
+        }
+    }
+
+    public static void SubscribeReaction<T>(Action<T> reaction, ReactionTiming timing) where T : GameAction
+    {
+        Type type = typeof(T);
+        Dictionary<Type, List<Action<GameAction>>> subs = timing == ReactionTiming.PRE ? preSubs : postSubs;
+
+        if (!subs.ContainsKey(type))
+        {
+            subs.Add(type, new List<Action<GameAction>>());
+        }
+        subs[type].Add((gameAction) => reaction((T)gameAction));
+    }
+
+    public static void UnsubscribeReaction<T>(Action<T> reaction, ReactionTiming timing) where T : GameAction
+    {
+        Type type = typeof(T);
+        Dictionary<Type, List<Action<GameAction>>> subs = timing == ReactionTiming.PRE ? preSubs : postSubs;
+
+        if (subs.ContainsKey(type))
+        {
+            subs[type].Remove((gameAction) => reaction((T)gameAction));
+        }
+    }
 }
