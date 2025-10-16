@@ -1,17 +1,21 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
 using UnityEngine;
 
 public class ActionSystem : Singleton<ActionSystem>
 {
-    private List<GameAction> reactions = null;
+    private List<GameAction> reactions = null; // current reaction bucket (pre or post)
     public bool isPerforming { get; private set; } = false;
 
-    private static Dictionary<Type, List<Action<GameAction>>> preSubs = new();
-    private static Dictionary<Type, List<Action<GameAction>>> postSubs = new();
-    private static Dictionary<Type, Func<GameAction, IEnumerator>> performers = new();
+    private static readonly Dictionary<Type, List<Action<GameAction>>> preSubs = new();
+    private static readonly Dictionary<Type, List<Action<GameAction>>> postSubs = new();
+
+    // Keep wrapper indexes so Unsubscribe can remove exactly what Subscribe added
+    private static readonly Dictionary<Type, Dictionary<Delegate, Action<GameAction>>> preIndex = new();
+    private static readonly Dictionary<Type, Dictionary<Delegate, Action<GameAction>>> postIndex = new();
+
+    private static readonly Dictionary<Type, Func<GameAction, IEnumerator>> performers = new();
 
     public event Action OnPerformFinished = null;
 
@@ -19,107 +23,135 @@ public class ActionSystem : Singleton<ActionSystem>
     {
         if (isPerforming) return;
         isPerforming = true;
-        StartCoroutine(Flow(action));
+        StartCoroutine(Flow(action, () =>
+        {
+            isPerforming = false;
+            OnPerformFinished?.Invoke();
+        }));
     }
 
     public void AddReaction(GameAction gameAction)
     {
+        if (reactions == null)
+        {
+            Debug.LogWarning("AddReaction() called while no reaction list is active. Ignored.");
+            return;
+        }
         reactions.Add(gameAction);
     }
 
     private IEnumerator Flow(GameAction action, Action OnFlowFinished = null)
     {
+        // PRE
         reactions = action.PreReactions;
         PerformSubscribers(action, preSubs);
-        yield return PerformReactions();
+        yield return PerformReactions(reactions);
 
+        // MAIN
         yield return PerformPerformer(action);
 
+        // POST
         reactions = action.PostReactions;
         PerformSubscribers(action, postSubs);
-        yield return PerformReactions();
+        yield return PerformReactions(reactions);
 
         OnFlowFinished?.Invoke();
-        isPerforming = false;
     }
 
     private IEnumerator PerformPerformer(GameAction action)
     {
-        Type type = action.GetType();
-        if (performers.ContainsKey(type))
+        var type = action.GetType();
+        if (performers.TryGetValue(type, out var perf))
         {
-            yield return performers[type](action);
+            yield return perf(action);
         }
         else
         {
             Debug.LogError($"No performer found for action type: {type}");
+            yield break;
         }
     }
 
-    private void PerformSubscribers(GameAction gameAction, Dictionary<Type, List<Action<GameAction>>> subs)
+    private static void PerformSubscribers(GameAction gameAction, Dictionary<Type, List<Action<GameAction>>> subs)
     {
-        Type type = gameAction.GetType();
-        if (subs.ContainsKey(type))
+        var type = gameAction.GetType();
+        if (!subs.TryGetValue(type, out var list) || list.Count == 0) return;
+
+        // Snapshot to avoid issues if reactions subscribe/unsubscribe during iteration
+        var snapshot = list.ToArray();
+        for (int i = 0; i < snapshot.Length; i++)
         {
-            foreach (var sub in subs[type])
-            {
-                sub(gameAction);
-            }
+            try { snapshot[i](gameAction); }
+            catch (Exception e) { Debug.LogException(e); }
         }
     }
 
-    private IEnumerator PerformReactions()
+    private static IEnumerator PerformReactions(List<GameAction> list)
     {
-        foreach (var reaction in reactions)
+        if (list == null || list.Count == 0) yield break;
+
+        // Use index-based loop so newly added reactions (via AddReaction) are included
+        for (int i = 0; i < list.Count; i++)
         {
-            yield return Flow(reaction);
+            var r = list[i];
+            // Re-enter Flow for nested reactions
+            yield return Instance.Flow(r);
         }
-        reactions.Clear();
+
+        // Clear the exact list we just processed
+        list.Clear();
     }
 
+    // ---- Performer API ----
     public static void AttachPerformer<T>(Func<T, IEnumerator> performer) where T : GameAction
     {
-        Type type = typeof(T);
-        if (performers.ContainsKey(type))
-        {
-            Debug.LogWarning($"Performer already attached for action type: {type}. Overwriting.");
-            performers[type] = (action) => performer((T)action);
-        }
-        else
-        {
-            performers.Add(type, (action) => performer((T)action));
-        }
+        var type = typeof(T);
+        performers[type] = (action) => performer((T)action);
     }
 
     public static void DetachPerformer<T>() where T : GameAction
     {
-        Type type = typeof(T);
-        if (performers.ContainsKey(type))
-        {
-            performers.Remove(type);
-        }
+        var type = typeof(T);
+        performers.Remove(type);
     }
 
+    // ---- Reaction API ----
     public static void SubscribeReaction<T>(Action<T> reaction, ReactionTiming timing) where T : GameAction
     {
-        Type type = typeof(T);
-        Dictionary<Type, List<Action<GameAction>>> subs = timing == ReactionTiming.PRE ? preSubs : postSubs;
+        var type = typeof(T);
+        var subs = timing == ReactionTiming.PRE ? preSubs : postSubs;
+        var index = timing == ReactionTiming.PRE ? preIndex : postIndex;
 
-        if (!subs.ContainsKey(type))
+        if (!subs.TryGetValue(type, out var list))
         {
-            subs.Add(type, new List<Action<GameAction>>());
+            list = new List<Action<GameAction>>();
+            subs[type] = list;
         }
-        subs[type].Add((gameAction) => reaction((T)gameAction));
+        if (!index.TryGetValue(type, out var map))
+        {
+            map = new Dictionary<Delegate, Action<GameAction>>();
+            index[type] = map;
+        }
+
+        // Create and store a stable wrapper so we can remove it later
+        Action<GameAction> wrapper = (ga) => reaction((T)ga);
+        map[reaction] = wrapper;
+        list.Add(wrapper);
     }
 
     public static void UnsubscribeReaction<T>(Action<T> reaction, ReactionTiming timing) where T : GameAction
     {
-        Type type = typeof(T);
-        Dictionary<Type, List<Action<GameAction>>> subs = timing == ReactionTiming.PRE ? preSubs : postSubs;
+        var type = typeof(T);
+        var subs = timing == ReactionTiming.PRE ? preSubs : postSubs;
+        var index = timing == ReactionTiming.PRE ? preIndex : postIndex;
 
-        if (subs.ContainsKey(type))
+        if (!index.TryGetValue(type, out var map)) return;
+        if (!map.TryGetValue(reaction, out var wrapper)) return;
+
+        if (subs.TryGetValue(type, out var list))
         {
-            subs[type].Remove((gameAction) => reaction((T)gameAction));
+            list.Remove(wrapper);
         }
+        map.Remove(reaction);
     }
 }
