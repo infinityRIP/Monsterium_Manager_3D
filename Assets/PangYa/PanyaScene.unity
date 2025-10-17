@@ -360,8 +360,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 329.9, y: -47}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: 804.9166, y: -379}
+  m_SizeDelta: {x: 259.8333, y: 48.719}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &426628409
 MonoBehaviour:
@@ -696,9 +696,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hand: {fileID: 54565870}
-  defaultCard: {fileID: 11400000, guid: 900d22ca20289f444871bb4159596e75, type: 2}
+  deck: {fileID: 806318607}
   maxHand: 25
-  currentHandCount: 5
+  openingHand: 5
+  currentHandCount: 0
 --- !u!1 &746260170
 GameObject:
   m_ObjectHideFlags: 0
@@ -732,6 +733,53 @@ Transform:
   - {fileID: 172236487}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &806318605
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 806318606}
+  - component: {fileID: 806318607}
+  m_Layer: 0
+  m_Name: Deckmanager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &806318606
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 806318605}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1287056505}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &806318607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 806318605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07bf88e4786a1a34981291789932a338, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startingDeck: {fileID: 11400000, guid: a6adf93d7c3c47a4c876428630b8cb34, type: 2}
+  drawCount: 1
+  discardCount: 0
 --- !u!1 &999540474
 GameObject:
   m_ObjectHideFlags: 0
@@ -923,7 +971,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1174594711}
   - component: {fileID: 1174594712}
-  - component: {fileID: 1174594713}
   m_Layer: 0
   m_Name: TestSystem
   m_TagString: Untagged
@@ -959,21 +1006,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hand: {fileID: 54565870}
-  testCardData: {fileID: 11400000, guid: 900d22ca20289f444871bb4159596e75, type: 2}
-  cardsOnFirstTurn: 5
-  firstTurnStagger: 0.12
---- !u!114 &1174594713
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1174594710}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc766f7f517d3e144a4d9c8380b072c3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  testCardData: {fileID: 11400000, guid: c818eddc46a840c4d909c4843d061445, type: 2}
   cardsOnFirstTurn: 5
   firstTurnStagger: 0.12
 --- !u!1 &1239841073
@@ -1161,6 +1194,7 @@ Transform:
   - {fileID: 1087064650}
   - {fileID: 1387133788}
   - {fileID: 719713845}
+  - {fileID: 806318606}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1387133787

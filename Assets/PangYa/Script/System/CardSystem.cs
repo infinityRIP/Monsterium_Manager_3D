@@ -1,103 +1,106 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Domain layer for card drawing.
-/// - Listens to DrawcardGA and spawns via HandViewManager.
-/// - Centralizes rules (25-card cap now; easy to extend with costs/shuffle/AI later).
-/// - Keeps the view (HandViewManager) decoupled from rules.
+/// Centralizes drawing rules and talks to the view.
 /// </summary>
 public class CardSystem : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private HandViewManager hand;           // drag your HandViewManager here
-    [SerializeField] private AllCardData     defaultCard;    // used when GA doesn't provide specific data
+    [SerializeField] private HandViewManager hand;
+    [SerializeField] private DeckRuntime     deck;
 
     [Header("Rules")]
-    [SerializeField] private int maxHand = 25;
+    [SerializeField] private int maxHand     = 25;
+    [SerializeField] private int openingHand = 5;   // draw 5 at start
 
-    // We track count on the domain side so rules are centralized.
-    // If your HandViewManager exposes a count, you can read that instead.
     [SerializeField] private int currentHandCount = 0;
+
+    private void Awake()
+    {
+        if (deck == null) deck = GetComponent<DeckRuntime>();
+    }
 
     private void OnEnable()
     {
-        // Performer for DrawcardGA
         ActionSystem.AttachPerformer<DrawcardGA>(PerformDraw);
-        ActionSystem.SubscribeReaction<EnemyTurnGA>(EnemyTurnPreReaction, ReactionTiming.PRE);
+
+        // "New turn" → draw 1 at the end of EnemyTurn (so it appears at start of player's turn).
         ActionSystem.SubscribeReaction<EnemyTurnGA>(EnemyTurnPostReaction, ReactionTiming.POST);
+
+        // Opening hand
+        StartCoroutine(DealOpeningHand());
     }
 
     private void OnDisable()
     {
         ActionSystem.DetachPerformer<DrawcardGA>();
-        ActionSystem.UnsubscribeReaction<EnemyTurnGA>(EnemyTurnPreReaction, ReactionTiming.PRE);
         ActionSystem.UnsubscribeReaction<EnemyTurnGA>(EnemyTurnPostReaction, ReactionTiming.POST);
     }
 
+    private IEnumerator DealOpeningHand()
+    {
+        if (hand == null || deck == null) yield break;
+        yield return StartCoroutine(DrawFromDeckToHand(openingHand));
+    }
+
+    /// <summary>Helper used by both opening hand and GA path.</summary>
+    private IEnumerator DrawFromDeckToHand(int amount)
+    {
+        if (amount <= 0 || hand == null || deck == null) yield break;
+
+        int capacityLeft = Mathf.Max(0, maxHand - currentHandCount);
+        int want = Mathf.Min(amount, capacityLeft);
+        if (want <= 0) yield break;
+
+        List<DeckRuntime.CardInstance> batch = deck.DrawOrRebuild(want);
+
+        foreach (var inst in batch)
+        {
+            if (inst?.Data == null) continue;
+            yield return hand.StartCoroutine(hand.Spawn(inst.Data));
+            currentHandCount++;
+        }
+    }
+
     /// <summary>
-    /// Draw performer: respects the hand limit, spawns cards via the view.
+    /// Performer for DrawcardGA. Uses DeckRuntime as the source of truth and rebuilds automatically.
     /// </summary>
     private IEnumerator PerformDraw(DrawcardGA ga)
     {
-        if (hand == null || defaultCard == null)
-        {
-            Debug.LogError("[CardSystem] Missing refs.");
-            yield break;
-        }
+        if (hand == null || deck == null) yield break;
 
-        int capacityLeft = Mathf.Max(0, maxHand - currentHandCount);
-
-        // If GA carries explicit cards, prefer them
+        // If GA brought specific cards, spawn those (still respect hand cap)
         if (ga.Cards != null && ga.Cards.Count > 0)
         {
+            int capacityLeft = Mathf.Max(0, maxHand - currentHandCount);
             int toTake = Mathf.Min(capacityLeft, ga.Cards.Count);
             for (int i = 0; i < toTake; i++)
             {
-                yield return hand.StartCoroutine(hand.Spawn(ga.Cards[i]));
+                var data = ga.Cards[i];
+                if (data == null) continue;
+                yield return hand.StartCoroutine(hand.Spawn(data));
                 currentHandCount++;
             }
-
-            int skipped = ga.Cards.Count - toTake;
-            if (skipped > 0)
-                Debug.LogWarning($"[CardSystem] Hand full ({maxHand}). Skipped {skipped} specific card(s).");
             yield break;
         }
 
-        // Fallback: draw N of defaultCard
-        int toDraw = Mathf.Clamp(ga.Amount, 0, capacityLeft);
-        for (int i = 0; i < toDraw; i++)
-        {
-            yield return hand.StartCoroutine(hand.Spawn(defaultCard));
-            currentHandCount++;
-        }
-
-        int notDrawn = ga.Amount - toDraw;
-        if (notDrawn > 0)
-            Debug.LogWarning($"[CardSystem] Hand full ({maxHand}). Skipped {notDrawn} draw(s).");
+        // Otherwise draw from DeckRuntime (auto rebuild if needed)
+        yield return StartCoroutine(DrawFromDeckToHand(Mathf.Max(0, ga.Amount)));
     }
 
-    private void EnemyTurnPreReaction(EnemyTurnGA enemyTurnGA)
-    {
-        
-    }
     private void EnemyTurnPostReaction(EnemyTurnGA enemyTurnGA)
     {
-        DrawcardGA drawcardGA = new(1);
-        ActionSystem.Instance.AddReaction(drawcardGA);
+        // Queue a draw of 1 at the end of enemy turn → appears as start-of-player-turn draw
+        ActionSystem.Instance.AddReaction(new DrawcardGA(1));
     }
 
-
-    // --- Public hooks for other systems (discard, play, mulligan, etc.) ---
-
-    /// <summary>Call when a card leaves the hand (played/discarded).</summary>
+    // --- Public hooks for other systems (discard/play can call this) ---
     public void OnCardRemovedFromHand(int count = 1)
     {
         currentHandCount = Mathf.Max(0, currentHandCount - Mathf.Max(0, count));
     }
-
-    /// <summary>Force-set if you sync with an external view count.</summary>
-    public void SetHandCount(int value) => currentHandCount = Mathf.Clamp(value, 0, maxHand);
 
     public int  CurrentHandCount => currentHandCount;
     public int  MaxHand          => maxHand;
