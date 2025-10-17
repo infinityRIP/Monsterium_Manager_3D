@@ -51,6 +51,11 @@ public class JumpController : MonoBehaviour
         {
             jumpPressed = false;
             Player.Instance.verticalVelocity += jumpForce;
+
+            if (Player.Instance.verticalVelocity >= jumpForce + 20)
+            {
+                Player.Instance.verticalVelocity = jumpForce;
+            }
         }
         else
         {
