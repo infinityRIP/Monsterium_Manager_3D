@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public enum StatsType
 {
     MaxHealth,
@@ -9,6 +8,14 @@ public enum StatsType
     Defense,
     Persuasion
 }
+
+public enum ItemType
+{
+    Weapon,
+    Equipment,
+    Item,
+}
+
 [System.Serializable]
 public struct ItemStatSpec
 {
@@ -21,12 +28,25 @@ public struct ItemStatSpec
 [CreateAssetMenu(menuName = "Game/Item", fileName = "Item")]
 public class ItemSO : ScriptableObject
 {
+    public Sprite icon;
     public string id;
     public string displayName;
-    public Sprite icon;
-    public StatsType stat;            
-    public StatModifierType mode;
+    public int amount;
+    public int maxNumberOfItem;
+    [TextArea(3, 12)]public string description;
 
-    [Header("Stat Modifiers")]
+
+    [Header("Type")]
+    public ItemType itemtype;
     public List<ItemStatSpec> modifiers = new();
+
+
+    public void Use()
+    {
+        if (itemtype == ItemType.Item)
+        {
+
+        }
+    }
+    
 }
