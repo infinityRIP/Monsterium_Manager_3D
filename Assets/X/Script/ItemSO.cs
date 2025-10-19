@@ -48,5 +48,27 @@ public class ItemSO : ScriptableObject
 
         }
     }
-    
+    public void Equip()
+    {
+        switch (itemtype)
+        {
+            case ItemType.Weapon:
+
+
+
+                break;
+            case ItemType.Equipment:
+
+                break;
+        }
+    }
+
+    void Checkmodifiers()
+    {
+        for (int i = 0; i < modifiers.Count; i++)
+        {
+
+        }
+    }
+
 }
