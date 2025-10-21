@@ -63,8 +63,6 @@ public class Player : Singleton<Player>
         InputManagement();
         Run();
         Move();
-
-
     }
     #endregion
 
